@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>欢迎来到我的个人主页</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sports-blue: #0A2540;
+            --tennis-green: #CCFF00;
+            --electric-teal: #00F2FE;
+            --accent-cyan: #4FACFE;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', 'Outfit', sans-serif;
+            background-color: #080D1A;
+            color: #E2E8F0;
+            overflow: hidden;
+        }
+
+        .video-bg-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .video-bg {
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: cover;
+        }
+
+        .btn-sports-center {
+            background: linear-gradient(135deg, #CCFF00 0%, #00F2FE 100%);
+            color: #0A2540;
+            font-weight: 800;
+            letter-spacing: 2px;
+            clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 25px rgba(204, 255, 0, 0.4);
+        }
+
+        .btn-sports-center:hover {
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 0 40px rgba(0, 242, 254, 0.7);
+            background: linear-gradient(135deg, #00F2FE 0%, #CCFF00 100%);
+        }
+
+        .btn-delayed-show {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.8s ease-in-out;
+        }
+
+        .btn-delayed-show.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .main-world-bg {
+            background-image: linear-gradient(rgba(8, 13, 26, 0.45), rgba(8, 13, 26, 0.65)),
+                              url('assets/images/sky-bg.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .card-container {
+            display: flex;
+            width: 100%;
+            max-width: 1200px;
+            height: 520px;
+            position: relative;
+            perspective: 1000px;
+        }
+
+        .card-item {
+            position: relative;
+            flex: 1;
+            height: 100%;
+            margin-right: -45px;
+            border-radius: 20px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+            background-size: cover;
+            background-position: center;
+        }
+
+        .card-item:last-child { margin-right: 0; }
+        .card-item:nth-child(1) { z-index: 1; }
+        .card-item:nth-child(2) { z-index: 2; }
+        .card-item:nth-child(3) { z-index: 3; }
+        .card-item:nth-child(4) { z-index: 4; }
+
+        .card-bg-1 { background-image: url('assets/images/photo1.jpg'); }
+        .card-bg-2 { background-image: url('assets/images/photo2.jpg'); }
+        .card-bg-3 { background-image: url('assets/images/photo3.jpg'); }
+        .card-bg-4 { background-image: url('assets/images/photo4.jpg'); }
+
+        .card-overlay-shade {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(8, 13, 26, 0.8) 0%, rgba(8, 13, 26, 0) 35%);
+            transition: all 0.4s ease;
+        }
+
+        .card-container:hover .card-item { flex: 0.65; }
+        .card-container .card-item:hover {
+            flex: 2.2;
+            z-index: 10 !important;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7);
+            border-color: rgba(255, 255, 255, 0.8);
+        }
+
+        .detail-view {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+            background-size: cover !important;
+            background-position: center !important;
+            background-repeat: no-repeat !important;
+        }
+
+        .detail-view.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        #detail-left-card {
+            background-size: cover !important;
+            background-position: center top !important;
+            background-repeat: no-repeat !important;
+        }
+
+        .detail-right-panel {
+            background: rgba(15, 23, 42, 0.35);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            overflow-y: auto;
+        }
+
+        .detail-item-bg {
+            background: rgba(15, 23, 42, 0.55);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+        }
+
+        .detail-item-title { color: #CCFF00; }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: linear-gradient(to bottom, #CCFF00, #00F2FE);
+            border-radius: 8px;
+        }
+
+        .carousel-track {
+            display: flex;
+            transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        #media-modal { transition: opacity 0.3s ease, visibility 0.3s ease; }
+        #media-modal.active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+        #media-modal-content { transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        #media-modal.active #media-modal-content { transform: scale(1); }
+    </style>
+</head>
+<body class="bg-[#080D1A] text-slate-100 min-h-screen flex flex-col justify-between selection:bg-[#CCFF00] selection:text-[#0A2540]">
+
+    <!-- 首页落地页 -->
+    <section id="landing-page" class="fixed inset-0 z-50 transition-all duration-700 flex flex-col items-center justify-center">
+        <div class="video-bg-container">
+            <video class="video-bg" autoplay muted loop playsinline preload="auto">
+                <source src="assets/videos/background.mp4" type="video/mp4">
+            </video>
+        </div>
+
+        <div id="delayed-btn-wrapper" class="relative z-20 btn-delayed-show">
+            <button id="btn-enter" onclick="enterMainWorld()" class="btn-sports-center px-10 py-4 text-xl flex items-center gap-3 backdrop-blur-sm group">
+                <span>点击进入</span>
+                <i class="fa-solid fa-arrow-right group-hover:translate-x-2 transition-transform"></i>
+            </button>
+        </div>
+
+        <div id="wait-notice" class="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 text-white text-sm font-medium tracking-widest bg-black/40 px-6 py-2 rounded-full backdrop-blur-md border border-white/20 transition-opacity duration-500">
+            视频加载中，请等待 <span id="countdown-num" class="font-bold">6</span> 秒后点击进入主页…
+        </div>
+    </section>
+
+    <!-- 主交互界面 -->
+    <main id="main-world" class="main-world-bg fixed inset-0 z-40 flex flex-col items-center justify-center px-6 opacity-0 pointer-events-none transition-opacity duration-700">
+        <header class="w-full max-w-6xl flex justify-between items-center mb-8">
+            <div>
+                <span class="text-xs font-bold tracking-widest text-[#00F2FE] uppercase">Navigation</span>
+                <h2 class="text-3xl md:text-4xl font-extrabold text-[#00F2FE] tracking-wide drop-shadow-md">欢迎来到我的世界</h2>
+            </div>
+            <button onclick="resetToLanding()" class="px-4 py-2 text-sm rounded-lg bg-slate-900/80 hover:bg-slate-800 text-slate-200 hover:text-white border border-slate-600/60 backdrop-blur-md transition flex items-center gap-2">
+                <i class="fa-solid fa-house"></i> 返回首页
+            </button>
+        </header>
+
+        <div class="card-container">
+            <div class="card-item card-bg-1" onclick="openSection('profile')">
+                <div class="card-overlay-shade"></div>
+                <div class="absolute inset-0 p-6 flex flex-col justify-end z-10">
+                    <h3 class="text-2xl font-bold text-white mb-1 drop-shadow-lg">个人简介</h3>
+                </div>
+            </div>
+
+            <div class="card-item card-bg-2" onclick="openSection('hobbies')">
+                <div class="card-overlay-shade"></div>
+                <div class="absolute inset-0 p-6 flex flex-col justify-end z-10">
+                    <h3 class="text-2xl font-bold text-white mb-1 drop-shadow-lg">兴趣爱好</h3>
+                </div>
+            </div>
+
+            <div class="card-item card-bg-3" onclick="openSection('experience')">
+                <div class="card-overlay-shade"></div>
+                <div class="absolute inset-0 p-6 flex flex-col justify-end z-10">
+                    <h3 class="text-2xl font-bold text-white mb-1 drop-shadow-lg">成长经历</h3>
+                </div>
+            </div>
+
+            <div class="card-item card-bg-4" onclick="openSection('projects')">
+                <div class="card-overlay-shade"></div>
+                <div class="absolute inset-0 p-6 flex flex-col justify-end z-10">
+                    <h3 class="text-2xl font-bold text-white mb-1 drop-shadow-lg">社会实践</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-6 text-xs text-slate-200 bg-slate-900/60 px-4 py-2 rounded-full border border-slate-700/50 backdrop-blur-md flex items-center gap-2">
+            <i class="fa-solid fa-lightbulb text-[#CCFF00]"></i> 提示：鼠标悬停预览，点击卡片可展开看图文详情
+        </div>
+    </main>
+
+    <!-- 统一详情弹层 -->
+    <section id="detail-view" class="detail-view fixed inset-0 z-50 flex px-4 md:px-6 py-6 gap-6 h-screen w-screen overflow-hidden">
+
+        <!-- 左侧固定侧边栏 -->
+        <div id="detail-left-card" class="w-full lg:w-1/3 h-full rounded-2xl relative overflow-hidden flex flex-col justify-between p-8 border border-slate-700/60 shadow-2xl shrink-0 bg-[#080D1A] transition-all duration-500">
+            <div class="absolute inset-0 bg-gradient-to-t from-[#080D1A]/90 via-[#080D1A]/30 to-transparent z-0 pointer-events-none"></div>
+
+            <div class="relative z-10 flex justify-between items-center">
+                <button onclick="closeDetail()" class="w-10 h-10 rounded-full bg-slate-900/80 hover:bg-[#CCFF00] hover:text-[#0A2540] text-white border border-slate-600/60 flex items-center justify-center transition shadow-lg">
+                    <i class="fa-solid fa-chevron-left text-lg"></i>
+                </button>
+            </div>
+
+            <div class="relative z-10">
+                <div id="detail-badge" class="inline-block px-3 py-1 rounded bg-[#CCFF00]/20 text-[#CCFF00] border border-[#CCFF00]/30 text-xs font-bold mb-3">
+                    PROFILE
+                </div>
+                <h2 id="detail-title" class="text-3xl md:text-4xl font-extrabold text-white mb-3 drop-shadow-md">个人简介</h2>
+                <p id="detail-desc" class="text-sm text-slate-300 leading-relaxed drop-shadow">展示我的核心定位与个性表达。</p>
+            </div>
+        </div>
+
+        <!-- 右侧内容面板 -->
+        <div id="detail-right-panel" class="detail-right-panel flex-1 h-full rounded-2xl px-5 md:px-8 py-6 overflow-y-auto custom-scrollbar relative transition-all duration-500 shadow-2xl">
+            <div id="detail-content-body" class="w-full flex flex-col gap-6"></div>
+        </div>
+    </section>
+
+    <!-- 媒体弹窗 -->
+    <div id="media-modal" class="fixed inset-0 z-[100] bg-black/90 backdrop-blur-md flex items-center justify-center opacity-0 invisible pointer-events-none" onclick="closeMediaModal()">
+        <button onclick="closeMediaModal()" class="absolute top-6 right-6 text-white/70 hover:text-white text-3xl transition focus:outline-none z-10">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        <div id="media-modal-content" class="relative max-w-[95vw] max-h-[95vh] flex items-center justify-center scale-95 transition-transform duration-300" onclick="event.stopPropagation()"></div>
+    </div>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const btnWrapper = document.getElementById('delayed-btn-wrapper');
+            const waitNotice = document.getElementById('wait-notice');
+            const countdownNum = document.getElementById('countdown-num');
+
+            let timeLeft = 6;
+            const timer = setInterval(() => {
+                timeLeft--;
+                if (countdownNum) countdownNum.innerText = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    if (waitNotice) {
+                        waitNotice.style.opacity = '0';
+                        setTimeout(() => waitNotice.remove(), 500);
+                    }
+                }
+            }, 1000);
+
+            setTimeout(() => {
+                if (btnWrapper) btnWrapper.classList.add('visible');
+            }, 6000);
+        });
+
+        const contentData = {
+            profile: {
+                canvasBg: "assets/images/sky-bg.jpg",
+                badge: "ABOUT ME",
+                title: "个人简介",
+                desc: "持续努力，不断学习，以长期主义对抗不确定性！",
+                leftBg: "assets/images/photo1.jpg",
+                sections: [
+                    {
+                        type: "left-img",
+                        img: "assets/images/my-avatar1.jpg",
+                        title: "关于我",
+                        text: "我叫曾文升，武汉体育学院23级数据科学专业。经历了本科三年多的学习，熟悉数据挖掘、数据分析等相关技能。因为一直对经济学感兴趣，所以决定走“计算机+经济”的交叉学习道路。我觉得，是经济学教会我勇敢往前走。人一旦畏缩犹豫，其实就已经付出了很大的机会成本，主动丢掉了眼前的机会。"
+                    },
+                    {
+                        type: "right-img",
+                        img: "assets/images/my-avatar2.jpg",
+                        title: "技术信念与追求",
+                        text: "任何优秀的工程实现都需要严谨的态度和扎实的能力。我喜欢一点一点啃 Process 的过程，所以相对于“爆发型”选手，我是个比较踏实、持之以恒的人。右图是当时开学第一周认真学习，被拍上了官网。当时头发好凌乱，丢死人了，哈哈哈哈。"
+                    }
+                ]
+            },
+            hobbies: {
+                canvasBg: "assets/images/sky-bg.jpg",
+                badge: "SPORTS & HOBBIES",
+                title: "兴趣爱好",
+                desc: "网球场上的热血挥洒和对生活的热爱",
+                leftBg: "assets/images/photo2.jpg",
+                sections: [
+                    {
+                        type: "left-img",
+                        img: "assets/images/hobby1.jpg",
+                        title: "网球运动",
+                        text: "网球是我最喜爱的运动。赛场上的每一次挥拍、预判与脚步移动，都极大地锤炼了我的专注度与抗压能力。网球精神中的韧性与专注，也贯穿在我的日常学习中。在武体的这些年里，我也爱上了很多其他运动，例如桨板。在东湖上课的那些日子，始终记忆犹新。"
+                    },
+                    {
+                        type: "right-img",
+                        img: "assets/images/hobby2.jpg",
+                        title: "3D 数字人像与生成艺术",
+                        text: "课余时间，我喜欢探索 AIGC 工具、3D 数字化人像构建以及动态视频转场生成，尝试将前沿数字技术与运动视觉美学融合。可能我有点自恋吧哈哈哈，我觉得将自己，利用aigc技术，将自己放进自己喜欢的“世界”，与自己喜欢的人物交互，我觉得是很幸福的事。",
+                        hasEgg: true,
+                        video: "assets/videos/aigc-dance.mp4"
+                    }
+                ]
+            },
+            experience: {
+                canvasBg: "assets/images/sky-bg.jpg",
+                badge: "JOURNEY",
+                title: "成长经历",
+                desc: "求学之路与技术探索的每一个脚步",
+                leftBg: "assets/images/photo3.jpg",
+                sections: [
+                    {
+                        type: "left-img",
+                        img: "assets/images/grouth1.jpg",
+                        title: "经济学备考",
+                        text: "在本科大数据的学习过程之中，我爱上了更偏向于经济学相关的数据分析研究。从大三上开始，我便开始自学宏、微观经济学，计量经济学等课程。因为我平常时一直都挺努力的，所以意外获得了保研资格。并最终，选择以保研的道路，前往对经济学更深的研究的道路。"
+                    },
+                    {
+                        type: "right-img",
+                        img: "assets/images/grouth2.jpg",
+                        title: "本科毕设研究",
+                        text: "怀揣着对经济学与体育产业的双重热爱，我的本科毕业设计聚焦「港股体育鞋服企业基本面策略的机器学习预测研究」。项目完整覆盖多源异构数据采集清洗、混频特征工程、Informer 时序深度学习建模、SHAP 可解释性分析与量化交易策略回测全链路，沉淀了扎实的金融数据建模、长时序预测与可解释性分析实践经验，也构建起从数据特征挖掘到策略落地验证的完整研究闭环。"
+                    }
+                ]
+            },
+            projects: {
+                canvasBg: "assets/images/sky-bg.jpg",
+                badge: "VOLUNTEERING & PRACTICE",
+                title: "社会实践",
+                desc: "用知识传递温暖，用体育筑梦乡村。参与大别山区公益体育支教！",
+                leftBg: "assets/images/photo4.jpg",
+                isPracticeCarousel: true,
+                firstCard: {
+                    type: "left-img",
+                    img: "assets/images/zhijiao.jpg",
+                    title: "大别山公益支教",
+                    text: "大学期间，我积极投身于社会公益与基层支教实践活动。在2025年7.15到8.15期间，我来到了湖北省孝感市大悟县参与支教生活。在这段过程中，我通过各种寓教于乐的方式，激发孩子们对知识的渴望与对外界的探索精神，也让我对“体育教育”有了更深层次的理解。那段时光，将永远治愈我的内心......"
+                },
+                images: [
+                    "assets/images/zhijiao1.jpg",
+                    "assets/images/zhijiao2.jpg",
+                    "assets/images/zhijiao3.jpg",
+                    "assets/images/zhijiao4.jpg"
+                ]
+            }
+        };
+
+        function enterMainWorld() {
+            document.getElementById('landing-page').classList.add('opacity-0', 'pointer-events-none');
+            document.getElementById('main-world').classList.remove('opacity-0', 'pointer-events-none');
+        }
+
+        function resetToLanding() {
+            document.getElementById('landing-page').classList.remove('opacity-0', 'pointer-events-none');
+            document.getElementById('main-world').classList.add('opacity-0', 'pointer-events-none');
+        }
+
+        let carouselTimer = null;
+        let currentSlideIndex = 0;
+
+        function openSection(key) {
+            const data = contentData[key];
+            if (!data) return;
+
+            if (carouselTimer) {
+                clearInterval(carouselTimer);
+                carouselTimer = null;
+            }
+
+            const detailView = document.getElementById('detail-view');
+            detailView.style.backgroundImage = `url('${data.canvasBg}')`;
+
+            const leftCard = document.getElementById('detail-left-card');
+            leftCard.style.backgroundImage = `url('${data.leftBg}')`;
+
+            document.getElementById('detail-badge').innerText = data.badge;
+            document.getElementById('detail-title').innerText = data.title;
+            document.getElementById('detail-desc').innerText = data.desc;
+
+            const container = document.getElementById('detail-content-body');
+            container.innerHTML = '';
+
+            if (data.isPracticeCarousel) {
+                const firstSec = data.firstCard;
+                const card1 = document.createElement('div');
+                card1.className = "flex flex-col md:flex-row gap-6 md:gap-8 detail-item-bg p-6 md:p-8 rounded-2xl shadow-xl border border-white/15 items-center w-full shrink-0";
+
+                const mediaHTML = `
+                    <div class="w-full md:w-5/12 h-56 md:h-64 rounded-xl overflow-hidden shadow-xl border border-white/20 group cursor-pointer relative shrink-0" onclick="openMediaModal('${firstSec.img}', 'image')">
+                        <img src="${firstSec.img}" class="w-full h-full object-cover object-center group-hover:scale-105 transition duration-500" alt="img">
+                        <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-[#CCFF00] text-xl backdrop-blur-[2px]">
+                            <i class="fa-solid fa-magnifying-glass-plus"></i>
+                        </div>
+                    </div>
+                `;
+                const textHTML = `
+                    <div class="w-full md:w-7/12 flex flex-col justify-center">
+                        <h4 class="text-2xl font-extrabold detail-item-title mb-3 tracking-wide">${firstSec.title}</h4>
+                        <p class="text-base text-slate-100/95 leading-relaxed font-normal">${firstSec.text}</p>
+                    </div>
+                `;
+                card1.innerHTML = mediaHTML + textHTML;
+                container.appendChild(card1);
+
+                const card2 = document.createElement('div');
+                card2.className = "detail-item-bg p-6 md:p-8 rounded-2xl shadow-xl border border-white/15 w-full shrink-0";
+                card2.innerHTML = `
+                    <h4 class="text-2xl font-extrabold detail-item-title mb-4 tracking-wide flex items-center gap-2">
+                        <i class="fa-solid fa-[#CCFF00] fa-camera"></i> 实践风采展示
+                    </h4>
+                    <div class="relative w-full rounded-xl overflow-hidden border border-white/20 shadow-2xl group bg-black/40" onmouseenter="pauseCarousel()" onmouseleave="resumeCarousel(${data.images.length})">
+                        <div id="carousel-track" class="carousel-track flex w-full h-96 md:h-[480px]">
+                            ${data.images.map((imgSrc) => `
+                                <div class="w-full h-full shrink-0 relative cursor-pointer flex items-center justify-center bg-black/50" onclick="openMediaModal('${imgSrc}', 'image')">
+                                    <img src="${imgSrc}" class="w-full h-full object-cover object-center" alt="实践风采">
+                                </div>
+                            `).join('')}
+                        </div>
+
+                        <button onclick="prevSlide(${data.images.length})" class="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-slate-900/80 hover:bg-[#CCFF00] hover:text-[#0A2540] text-white border border-white/20 flex items-center justify-center transition shadow-lg opacity-0 group-hover:opacity-100">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </button>
+                        <button onclick="nextSlide(${data.images.length})" class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-slate-900/80 hover:bg-[#CCFF00] hover:text-[#0A2540] text-white border border-white/20 flex items-center justify-center transition shadow-lg opacity-0 group-hover:opacity-100">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+
+                        <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+                            ${data.images.map((_, i) => `
+                                <button id="dot-${i}" onclick="goToSlide(${i})" class="w-2.5 h-2.5 rounded-full bg-white/40 transition-all duration-300"></button>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card2);
+
+                currentSlideIndex = 0;
+                setTimeout(() => {
+                    updateSlidePosition(data.images.length);
+                    startCarousel(data.images.length);
+                }, 50);
+
+            } else {
+                data.sections.forEach((sec, idx) => {
+                    const sectionEl = document.createElement('div');
+                    sectionEl.className = "flex flex-col md:flex-row gap-6 md:gap-8 detail-item-bg p-6 md:p-8 rounded-2xl shadow-xl border border-white/15 items-center w-full shrink-0";
+
+                    let mediaHTML = "";
+
+                    if (sec.hasEgg) {
+                        const boxId = `egg-box-${idx}`;
+                        mediaHTML = `
+                            <div class="w-full md:w-5/12 h-56 md:h-64 relative rounded-xl overflow-hidden shadow-xl border border-white/20 shrink-0 bg-black">
+                                <div id="${boxId}-img" class="absolute inset-0 z-10 cursor-pointer group" onclick="openMediaModal('${sec.img}', 'image')">
+                                    <img src="${sec.img}" class="w-full h-full object-cover object-center group-hover:scale-105 transition duration-500" alt="img">
+                                    <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xl backdrop-blur-[2px]">
+                                        <i class="fa-solid fa-magnifying-glass-plus"></i>
+                                    </div>
+                                </div>
+                                <div id="${boxId}-video-container" class="absolute inset-0 z-20 hidden bg-black flex items-center justify-center">
+                                    <video id="${boxId}-video" src="${sec.video}" class="w-full h-full object-contain" loop controls muted playsinline preload="auto"></video>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        mediaHTML = `
+                            <div class="w-full md:w-5/12 h-56 md:h-64 rounded-xl overflow-hidden shadow-xl border border-white/20 group cursor-pointer relative shrink-0" onclick="openMediaModal('${sec.img}', 'image')">
+                                <img src="${sec.img}" class="w-full h-full object-cover object-center group-hover:scale-105 transition duration-500" alt="img">
+                                <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-[#CCFF00] text-xl backdrop-blur-[2px]">
+                                    <i class="fa-solid fa-magnifying-glass-plus"></i>
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    const eggButtonHTML = sec.hasEgg ? `
+                        <div class="mt-4">
+                            <button id="egg-btn-${idx}" onclick="toggleEggVideo('egg-box-${idx}', 'egg-btn-${idx}')" class="px-5 py-2 rounded-lg bg-gradient-to-r from-[#CCFF00] to-[#00F2FE] text-[#0A2540] font-extrabold text-sm flex items-center gap-2 hover:scale-105 hover:shadow-[0_0_20px_rgba(0,242,254,0.6)] transition-all duration-300">
+                                <i class="fa-solid fa-wand-magic-sparkles text-base"></i>
+                                <span id="egg-btn-text-${idx}">切换彩蛋视频</span>
+                            </button>
+                        </div>
+                    ` : '';
+
+                    const textHTML = `
+                        <div class="w-full md:w-7/12 flex flex-col justify-center">
+                            <h4 class="text-2xl font-extrabold detail-item-title mb-3 tracking-wide">${sec.title}</h4>
+                            <p class="text-base text-slate-100/95 leading-relaxed font-normal">${sec.text}</p>
+                            ${eggButtonHTML}
+                        </div>
+                    `;
+
+                    if (sec.type === 'left-img') {
+                        sectionEl.innerHTML = mediaHTML + textHTML;
+                    } else {
+                        sectionEl.innerHTML = textHTML + mediaHTML;
+                    }
+
+                    container.appendChild(sectionEl);
+                });
+            }
+
+            document.getElementById('detail-right-panel').scrollTop = 0;
+            document.getElementById('detail-view').classList.add('active');
+        }
+
+        function startCarousel(total) {
+            carouselTimer = setInterval(() => {
+                nextSlide(total);
+            }, 3500);
+        }
+
+        function pauseCarousel() {
+            if (carouselTimer) {
+                clearInterval(carouselTimer);
+                carouselTimer = null;
+            }
+        }
+
+        function resumeCarousel(total) {
+            pauseCarousel();
+            startCarousel(total);
+        }
+
+        function nextSlide(total) {
+            currentSlideIndex = (currentSlideIndex + 1) % total;
+            updateSlidePosition(total);
+        }
+
+        function prevSlide(total) {
+            currentSlideIndex = (currentSlideIndex - 1 + total) % total;
+            updateSlidePosition(total);
+        }
+
+        function goToSlide(index) {
+            currentSlideIndex = index;
+            const total = contentData.projects.images.length;
+            updateSlidePosition(total);
+        }
+
+        function updateSlidePosition(total) {
+            const track = document.getElementById('carousel-track');
+            if (track) {
+                track.style.transform = `translateX(-${currentSlideIndex * 100}%)`;
+            }
+            for (let i = 0; i < total; i++) {
+                const dot = document.getElementById(`dot-${i}`);
+                if (dot) {
+                    if (i === currentSlideIndex) {
+                        dot.className = "w-6 h-2.5 rounded-full bg-[#CCFF00] shadow-[0_0_10px_#CCFF00] transition-all duration-300";
+                    } else {
+                        dot.className = "w-2.5 h-2.5 rounded-full bg-white/40 hover:bg-white/80 transition-all duration-300";
+                    }
+                }
+            }
+        }
+
+        function closeDetail() {
+            document.getElementById('detail-view').classList.remove('active');
+            if (carouselTimer) {
+                clearInterval(carouselTimer);
+                carouselTimer = null;
+            }
+            document.querySelectorAll('video').forEach(v => {
+                if (v.id !== 'landing-bg-video') v.pause();
+            });
+        }
+
+        function toggleEggVideo(boxId, btnId) {
+            const imgBox = document.getElementById(`${boxId}-img`);
+            const videoContainer = document.getElementById(`${boxId}-video-container`);
+            const videoEl = document.getElementById(`${boxId}-video`);
+            const btnText = document.getElementById(`egg-btn-text-${btnId.replace('egg-btn-', '')}`);
+
+            if (videoContainer.classList.contains('hidden')) {
+                videoContainer.classList.remove('hidden');
+                if (imgBox) imgBox.classList.add('hidden');
+                if (btnText) btnText.innerText = "隐藏彩蛋";
+
+                videoEl.muted = true;
+                videoEl.currentTime = 0;
+
+                const playPromise = videoEl.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(error => {
+                        console.log("播放限制提示：", error);
+                    });
+                }
+            } else {
+                videoContainer.classList.add('hidden');
+                if (imgBox) imgBox.classList.remove('hidden');
+                if (btnText) btnText.innerText = "切换彩蛋视频";
+                videoEl.pause();
+            }
+        }
+
+        function openMediaModal(src, type) {
+            const modal = document.getElementById('media-modal');
+            const contentContainer = document.getElementById('media-modal-content');
+
+            if (type === 'video') {
+                contentContainer.innerHTML = `
+                    <video src="${src}" class="max-w-full max-h-[85vh] rounded-lg shadow-2xl border border-slate-700" controls autoplay muted playsinline loop></video>
+                `;
+            } else {
+                contentContainer.innerHTML = `
+                    <img src="${src}" alt="放大预览" class="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl">
+                `;
+            }
+            modal.classList.add('active');
+        }
+
+        function closeMediaModal() {
+            const modal = document.getElementById('media-modal');
+            const contentContainer = document.getElementById('media-modal-content');
+
+            const videoInModal = contentContainer.querySelector('video');
+            if (videoInModal) {
+                videoInModal.pause();
+            }
+
+            modal.classList.remove('active');
+            setTimeout(() => {
+                contentContainer.innerHTML = '';
+            }, 300);
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeMediaModal();
+            }
+        });
+    </script>
+</body>
+</html>
